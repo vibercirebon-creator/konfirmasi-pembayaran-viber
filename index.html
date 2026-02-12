@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konfirmasi Bayar WiFi Viber</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  margin: 0;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+h2 {
+  text-align: center;
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+input, textarea, button {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+textarea {
+  resize: none;
+  height: 40px; /* ringkas supaya muat satu layar */
+}
+
+button {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  margin-top: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #218838;
+}
+
+.preview-container {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.preview-img, .preview-pdf {
+  max-width: 100%;
+  max-height: 200px; /* ringkas supaya muat layar */
+  border-radius: 5px;
+  display: none;
+  margin-top: 5px;
+}
+</style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>Konfirmasi Bayar WiFi Viber</h2>
+  <form id="konfirmasiForm">
+    <label>Nama / ID Pelanggan</label>
+    <input type="text" id="userId" placeholder="Masukkan nama atau ID" required>
+
+    <label>Alamat / Lokasi</label>
+    <textarea id="alamat" placeholder="Masukkan alamat / lokasi" required></textarea>
+
+    <label>Paket (Opsional)</label>
+    <input type="text" id="paket" placeholder="Isi paket jika ada (boleh kosong)">
+
+    <label>Jumlah Bayar</label>
+    <input type="number" id="amount" placeholder="Masukkan jumlah transfer" required>
+
+    <label>Tanggal Bayar</label>
+    <input type="date" id="date" required>
+
+    <label>Bukti Transfer</label>
+    <input type="file" id="buktiInput" accept="image/*,application/pdf" required>
+    
+    <div class="preview-container">
+      <img id="previewImg" class="preview-img">
+      <iframe id="previewPDF" class="preview-pdf"></iframe>
+    </div>
+
+    <button type="submit">Kirim Konfirmasi ke WA</button>
+  </form>
+</div>
+
+<script>
+// Preview file (gambar & PDF)
+const buktiInput = document.getElementById('buktiInput');
+const previewImg = document.getElementById('previewImg');
+const previewPDF = document.getElementById('previewPDF');
+
+buktiInput.addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  if(file.type.startsWith('image/')){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      previewImg.src = e.target.result;
+      previewImg.style.display = 'block';
+      previewPDF.style.display = 'none';
+    }
+    reader.readAsDataURL(file);
+  } else if(file.type === "application/pdf"){
+    const url = URL.createObjectURL(file);
+    previewPDF.src = url;
+    previewPDF.style.display = 'block';
+    previewImg.style.display = 'none';
+  } else {
+    alert("File tidak didukung!");
+    previewImg.style.display = 'none';
+    previewPDF.style.display = 'none';
+  }
+});
+
+// Submit form ke WhatsApp Admin
+document.getElementById('konfirmasiForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const userId = document.getElementById('userId').value;
+  const alamat = document.getElementById('alamat').value;
+  const paket = document.getElementById('paket').value;
+  const amount = document.getElementById('amount').value;
+  const date = document.getElementById('date').value;
+
+  let msg = `Halo Admin, saya konfirmasi bayar WiFi Plus.\nNama / ID: ${userId}\nAlamat / Lokasi: ${alamat}`;
+  if(paket) msg += `\nPaket: ${paket}`; // tampilkan hanya jika diisi
+  msg += `\nJumlah: ${amount}\nTanggal: ${date}\nBukti transfer: silakan dilihat di lampiran.`;
+
+  const waAdmin = "6285795636727"; // ganti nomor admin
+  const waUrl = `https://wa.me/${waAdmin}?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl, '_blank');
+
+  alert("Konfirmasi siap dikirim ke WhatsApp Admin.\nJika PDF atau gambar, silakan attach manual di WA.");
+});
+</script>
+
+</body>
+</html>
